@@ -10,15 +10,16 @@ def upload():
     files = request.files.getlist('file')
     for file in files:
         exists = db.session.query(File).filter(File.name == file.filename).first()
-        print(file)
+        res = []
         if not exists:
             file.save(FILE_DIR + file.filename)
             new_file = File(name=file.filename, type=file.mimetype)
             db.session.add(new_file)
+            db.session.flush()
+            res.append(new_file.as_dict())
 
-    db.session.flush()
     db.session.commit()
-    return jsonify({'message': 'File uploaded successfully'})
+    return jsonify(res)
 
 @file.route('/', methods=['GET'])
 def list():
