@@ -10,7 +10,10 @@ class PlaylistFile(db.Model):
 class File(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(150))
-    type = db.Column(db.String(15))
+    type = db.Column(db.String(255)) # maximum length of mimetype
+
+    def as_dict(self):
+       return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 class Playlist(db.Model):
     id = db.Column(db.Integer, primary_key = True)

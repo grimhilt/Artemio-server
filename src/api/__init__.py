@@ -19,9 +19,11 @@ def create_api():
 
     from .abl.user import user
     from .abl.playlist import playlist
+    from .abl.file import file
 
     app.register_blueprint(user, url_prefix='/api/user')
     app.register_blueprint(playlist, url_prefix='/api/playlist')
+    app.register_blueprint(file, url_prefix='/api/file')
 
     from .models import User, Playlist, PlaylistFile, File
 
