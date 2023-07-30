@@ -61,3 +61,14 @@ def add_file(playlist_id):
 
     return jsonify(success=True)
     
+@playlist.route('/<int:playlist_id>/order', methods=["POST"])
+def change_order(playlist_id):
+    data = request.get_json()
+    print(data)
+    db.session.query(PlaylistFile) \
+            .filter(PlaylistFile.file_id == data['file_id']) \
+            .filter(PlaylistFile.playlist_id == playlist_id) \
+            .update({'position': data['position']})
+    db.session.commit()
+
+    return jsonify(success=True)
