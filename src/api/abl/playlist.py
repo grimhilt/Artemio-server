@@ -1,6 +1,6 @@
 from flask import Blueprint, request, Response, jsonify
 from flask_cors import cross_origin
-from ..models import Playlist, PlaylistFile
+from ..models import Playlist, PlaylistFile, File
 from .. import db
 from datetime import datetime
 from sqlalchemy.sql import func
@@ -15,12 +15,9 @@ def create():
     db.session.flush()
     db.session.commit()
 
-    print(new_playlist.as_dict())
-    return Response(
-            response=new_playlist.as_dict(),
-            status=200,
-            mimetype="application/json"
-        )
+    res = new_playlist.as_dict()
+    res['last_modified'] = res['last_modified'].isoformat()
+    return jsonify(res)
 
 @playlist.route('/', methods=["GET"])
 def list():
@@ -36,23 +33,13 @@ def list():
 
 @playlist.route('/<int:playlist_id>', methods=["GET"])
 def get_playlist(playlist_id):
-    query = db.session.query(\
-            Playlist.name,\
-            func.group_concat(PlaylistFile.id).label('files')\
-        ).\
-        join(PlaylistFile, Playlist.id == PlaylistFile.playlist_id).\
-        filter(Playlist.id == playlist_id).\
-        group_by(Playlist.id).\
-        all()
+    query = db.session.query(Playlist).filter(Playlist.id == playlist_id).first()
 
-    query = db.session.query( \
-            Playlist.name, \
-            func.group_concat(Playlist.id == PlaylistFile.playlist_id) \
-            ) \
-        .outerjoin(PlaylistFile, Playlist.id == PlaylistFile.playlist_id) \
-        .filter(Playlist.id == playlist_id) \
-        .group_by(Playlist.id) \
-        .first()
+    files = []
+    for playlist_file in query.playlist_files:
+        file = playlist_file.file.as_dict()
+        file['position'] = playlist_file.position
+        file['seconds'] = playlist_file.seconds
+        files.append(file)
 
-    return jsonify({'name': query[0], 'files': query[1]})
-
+    return jsonify({'name': query.name, 'files': files})
