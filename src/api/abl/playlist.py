@@ -43,3 +43,21 @@ def get_playlist(playlist_id):
         files.append(file)
 
     return jsonify({'name': query.name, 'files': files})
+
+@playlist.route('/<int:playlist_id>', methods=["POST"])
+def add_file(playlist_id):
+    data = request.get_json()
+    print(data)
+    new_playlist_file = PlaylistFile( \
+            playlist_id=playlist_id, \
+            file_id=data['file_id'], \
+            position=data['position'], \
+            seconds=data['seconds'] \
+            )
+
+    db.session.add(new_playlist_file)
+    db.session.flush()
+    db.session.commit()
+
+    return jsonify(success=True)
+    
