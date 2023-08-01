@@ -86,3 +86,14 @@ def update(playlist_id):
 
     return jsonify(success=True)
 
+@playlist.route('/<int:playlist_id>/activate', methods=["POST"])
+def activate(playlist_id):
+    screen_manager = ScreenManager.getInstance() 
+    screen_manager.activate_playlist(playlist_id)
+    return jsonify(success=True)
+
+@playlist.route('/<int:playlist_id>/disactivate', methods=["POST"])
+def disactivate(playlist_id):
+    screen_manager = ScreenManager.getInstance() 
+    screen_manager.disactivate_playlist()
+    return jsonify(success=True)
