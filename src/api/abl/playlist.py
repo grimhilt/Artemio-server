@@ -65,6 +65,17 @@ def change_order(playlist_id):
 
     return jsonify(success=True)
 
+@playlist.route('/<int:playlist_id>/seconds', methods=["POST"])
+def change_seconds(playlist_id):
+    data = request.get_json()
+    db.session.query(PlaylistFile) \
+            .filter(PlaylistFile.file_id == data['file_id']) \
+            .filter(PlaylistFile.playlist_id == playlist_id) \
+            .update({'seconds': data['seconds']})
+    db.session.commit()
+
+    return jsonify(success=True)
+
 @playlist.route('/<int:playlist_id>/remove_file', methods=["POST"])
 def remove_file(playlist_id):
     data = request.get_json()
