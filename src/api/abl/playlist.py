@@ -85,3 +85,4 @@ def update(playlist_id):
     db.session.commit()
 
     return jsonify(success=True)
+
