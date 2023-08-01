@@ -4,6 +4,8 @@ from ..models import Playlist, PlaylistFile, File
 from .. import db
 from datetime import datetime
 from sqlalchemy.sql import func
+from ..dao.Playlist import PlaylistDao
+from screen.ScreenManager import ScreenManager
 
 playlist = Blueprint('playlist', __name__)
 
@@ -33,21 +35,12 @@ def list():
 
 @playlist.route('/<int:playlist_id>', methods=["GET"])
 def get_playlist(playlist_id):
-    query = db.session.query(Playlist).filter(Playlist.id == playlist_id).first()
-
-    files = []
-    for playlist_file in query.playlist_files:
-        file = playlist_file.file.as_dict()
-        file['position'] = playlist_file.position
-        file['seconds'] = playlist_file.seconds
-        files.append(file)
-
-    return jsonify({'name': query.name, 'files': files})
+    (query, files) = PlaylistDao.get_playlist(playlist_id)
+    return jsonify({'id': query.id, 'name': query.name, 'files': files})
 
 @playlist.route('/<int:playlist_id>', methods=["POST"])
 def add_file(playlist_id):
     data = request.get_json()
-    print(data)
     new_playlist_file = PlaylistFile( \
             playlist_id=playlist_id, \
             file_id=data['file_id'], \
@@ -64,7 +57,6 @@ def add_file(playlist_id):
 @playlist.route('/<int:playlist_id>/order', methods=["POST"])
 def change_order(playlist_id):
     data = request.get_json()
-    print(data)
     db.session.query(PlaylistFile) \
             .filter(PlaylistFile.file_id == data['file_id']) \
             .filter(PlaylistFile.playlist_id == playlist_id) \
@@ -76,12 +68,20 @@ def change_order(playlist_id):
 @playlist.route('/<int:playlist_id>/remove_file', methods=["POST"])
 def remove_file(playlist_id):
     data = request.get_json()
-    print(data)
     query = db.session.query(PlaylistFile) \
             .filter(PlaylistFile.file_id == data['file_id']) \
             .filter(PlaylistFile.playlist_id == playlist_id) \
             .first()
-    print(query)
     db.session.delete(query)
     db.session.commit()
+    return jsonify(success=True)
+
+@playlist.route('/<int:playlist_id>/update', methods=["POST"])
+def update(playlist_id):
+    data = request.get_json()
+    db.session.query(Playlist) \
+            .filter(Playlist.id == playlist_id) \
+            .update({'name': data['name']})
+    db.session.commit()
+
     return jsonify(success=True)
