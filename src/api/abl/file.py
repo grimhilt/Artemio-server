@@ -8,15 +8,15 @@ FILE_DIR = './data/'
 @file.route('/', methods=['POST'])
 def upload():
     files = request.files.getlist('file')
+    res = []
     for file in files:
         exists = db.session.query(File).filter(File.name == file.filename).first()
-        res = []
         if not exists:
             file.save(FILE_DIR + file.filename)
             new_file = File(name=file.filename, type=file.mimetype)
             db.session.add(new_file)
             db.session.flush()
-            res.append(new_file.as_dict())
+            res.append(new_file.as_dict().copy())
 
     db.session.commit()
     return jsonify(res)
