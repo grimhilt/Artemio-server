@@ -23,6 +23,7 @@ class File(db.Model):
 class Playlist(db.Model):
     id = db.Column(db.Integer, primary_key = True, autoincrement=True)
     name = db.Column(db.String(150))
+    owned_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     last_modified = db.Column(db.DateTime(timezone=True), default=func.now())
     read_permissions = db.Column(db.Integer, default=0)
     write_permissions = db.Column(db.Integer, default=0)
