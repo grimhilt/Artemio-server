@@ -8,6 +8,7 @@ FILE_DIR = './data/'
 @file.route('/', methods=['POST'])
 def upload():
     files = request.files.getlist('file')
+    print(files)
     res = []
     for file in files:
         exists = db.session.query(File).filter(File.name == file.filename).first()

@@ -33,7 +33,34 @@ class Playlist(db.Model):
     def as_dict(self):
        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
+class UserRole(db.Model):
+    __tablename__ = 'UserRole'
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    role_id = db.Column(db.Integer, db.ForeignKey('role.id'), primary_key=True)
+
+class Role(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String)
+    parent_id = db.Column(db.Integer, db.ForeignKey('role.id'))
+    can_create_role = db.Column(db.Boolean, default=False)
+    can_create_playlist = db.Column(db.Boolean, default=False)
+    users = db.relationship('User', secondary='UserRole', back_populates='roles')
+
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key = True, autoincrement=True)
     login = db.Column(db.String(150))
     password = db.Column(db.String(150))
+    roles = db.relationship('Role', secondary='UserRole', back_populates='users')
+
+    def as_dict(self):
+        res = self.as_dict_unsafe()
+        res['roles'] = [role.as_dict() for role in self.roles]
+        del res['password']
+        return res
+
+    def as_dict_unsafe(self):
+       return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+

@@ -5,21 +5,18 @@ from .. import db
 from datetime import datetime
 from sqlalchemy.sql import func
 from ..dao.Playlist import PlaylistDao
+from flask_login import login_required, current_user
+from ..abl.PlaylistAbl import PlaylistAbl
 from screen.ScreenManager import ScreenManager
+from ..permissions import Perm, permissions
 
 playlist = Blueprint('playlist', __name__)
 
-@playlist.route('/', methods=['PUT'])
+@playlist.route('/', methods=['POST'])
+@login_required
+@permissions.require([Perm.CREATE_PLAYLIST])
 def create():
-    data = request.get_json()
-    new_playlist = Playlist(name=data['name'])
-    db.session.add(new_playlist)
-    db.session.flush()
-    db.session.commit()
-
-    res = new_playlist.as_dict()
-    res['last_modified'] = res['last_modified'].isoformat()
-    return jsonify(res)
+    return PlaylistAbl.create(request.get_json())
 
 @playlist.route('/', methods=["GET"])
 def list():
@@ -87,7 +84,7 @@ def remove_file(playlist_id):
     db.session.commit()
     return jsonify(success=True)
 
-@playlist.route('/<int:playlist_id>/update', methods=["POST"])
+@playlist.route('/<int:playlist_id>/update', methods=["PUT"])
 def update(playlist_id):
     data = request.get_json()
     db.session.query(Playlist) \
