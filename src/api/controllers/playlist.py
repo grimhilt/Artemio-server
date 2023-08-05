@@ -19,6 +19,7 @@ def create():
     return PlaylistAbl.create(request.get_json())
 
 @playlist.route('/', methods=["GET"])
+@login_required
 def list():
     playlists = db.session.query(Playlist).all()
 
@@ -31,76 +32,52 @@ def list():
     return jsonify(res)
 
 @playlist.route('/<int:playlist_id>', methods=["GET"])
+@login_required
+@permissions.require([Perm.VIEW_PLAYLIST])
 def get_playlist(playlist_id):
-    (query, files) = PlaylistDao.get_playlist(playlist_id)
-    return jsonify({'id': query.id, 'name': query.name, 'files': files})
+    return PlaylistAbl.get_playlist(playlist_id)
+
+# EDIT PLAYLIST
 
 @playlist.route('/<int:playlist_id>', methods=["POST"])
+@login_required
+@permissions.require([Perm.EDIT_PLAYLIST])
 def add_file(playlist_id):
-    data = request.get_json()
-    new_playlist_file = PlaylistFile( \
-            playlist_id=playlist_id, \
-            file_id=data['file_id'], \
-            position=data['position'], \
-            seconds=data['seconds'] \
-            )
-
-    db.session.add(new_playlist_file)
-    db.session.flush()
-    db.session.commit()
-
-    return jsonify(success=True)
+    return PlaylistAbl.add_file(request.get_json())
     
 @playlist.route('/<int:playlist_id>/order', methods=["POST"])
+@login_required
+@permissions.require([Perm.EDIT_PLAYLIST])
 def change_order(playlist_id):
-    data = request.get_json()
-    db.session.query(PlaylistFile) \
-            .filter(PlaylistFile.file_id == data['file_id']) \
-            .filter(PlaylistFile.playlist_id == playlist_id) \
-            .update({'position': data['position']})
-    db.session.commit()
-
-    return jsonify(success=True)
+    return PlaylistAbl.change_order(request.get_json())
 
 @playlist.route('/<int:playlist_id>/seconds', methods=["POST"])
+@login_required
+@permissions.require([Perm.EDIT_PLAYLIST])
 def change_seconds(playlist_id):
-    data = request.get_json()
-    db.session.query(PlaylistFile) \
-            .filter(PlaylistFile.file_id == data['file_id']) \
-            .filter(PlaylistFile.playlist_id == playlist_id) \
-            .update({'seconds': data['seconds']})
-    db.session.commit()
-
-    return jsonify(success=True)
+    return PlaylistAbl.change_seconds(request.get_json())
 
 @playlist.route('/<int:playlist_id>/remove_file', methods=["POST"])
+@login_required
+@permissions.require([Perm.EDIT_PLAYLIST])
 def remove_file(playlist_id):
-    data = request.get_json()
-    query = db.session.query(PlaylistFile) \
-            .filter(PlaylistFile.file_id == data['file_id']) \
-            .filter(PlaylistFile.playlist_id == playlist_id) \
-            .first()
-    db.session.delete(query)
-    db.session.commit()
-    return jsonify(success=True)
+    return PlaylistAbl.remove_file(request.get_json())
 
 @playlist.route('/<int:playlist_id>/update', methods=["PUT"])
+@login_required
+@permissions.require([Perm.OWN_PLAYLIST])
 def update(playlist_id):
-    data = request.get_json()
-    db.session.query(Playlist) \
-            .filter(Playlist.id == playlist_id) \
-            .update({'name': data['name']})
-    db.session.commit()
-
-    return jsonify(success=True)
+    return PlaylistAbl.update(playlist_id, request.get_json())
 
 @playlist.route('/<int:playlist_id>/activate', methods=["POST"])
+@login_required
 def activate(playlist_id):
     screen_manager = ScreenManager.getInstance() 
     screen_manager.activate_playlist(playlist_id)
     return jsonify(success=True)
 
 @playlist.route('/<int:playlist_id>/disactivate', methods=["POST"])
+@login_required
 def disactivate(playlist_id):
     screen_manager = ScreenManager.getInstance() 
     screen_manager.disactivate_playlist()
