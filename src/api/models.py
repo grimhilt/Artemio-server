@@ -8,14 +8,12 @@ class PlaylistFile(db.Model):
     file_id = db.Column(db.Integer, db.ForeignKey('file.id'), primary_key=True)
     position = db.Column(db.Integer)
     seconds = db.Column(db.Integer, default=10)
-    playlist = db.relationship('Playlist', back_populates='playlist_files')
-    file = db.relationship('File', back_populates='playlist_files')
 
 class File(db.Model):
     id = db.Column(db.Integer, primary_key = True, autoincrement=True)
     name = db.Column(db.String(150))
     type = db.Column(db.String(255)) # maximum length of mimetype
-    playlist_files = db.relationship('PlaylistFile', back_populates='file')
+    playlists = db.relationship('Playlist', secondary='PlaylistFile', back_populates='files')
 
     def as_dict(self):
        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
@@ -28,8 +26,7 @@ class Playlist(db.Model):
     read_permissions = db.Column(db.Integer, default=0)
     write_permissions = db.Column(db.Integer, default=0)
     execute_permissions = db.Column(db.Integer, default=0)
-    files = db.relationship('File', secondary='PlaylistFile')
-    playlist_files = db.relationship('PlaylistFile', order_by='PlaylistFile.position', back_populates='playlist')
+    files = db.relationship('File', secondary='PlaylistFile', back_populates='playlists')
 
     def as_dict(self):
        return {c.name: getattr(self, c.name) for c in self.__table__.columns}

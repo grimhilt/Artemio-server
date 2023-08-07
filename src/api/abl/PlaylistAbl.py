@@ -28,8 +28,11 @@ class PlaylistAbl:
 
     @staticmethod
     def get_playlist(playlist_id):
-        (query, files) = PlaylistDao.get_playlist(playlist_id)
-        return jsonify({'id': query.id, 'name': query.name, 'files': files})
+        print("get")
+        #(query, files) = PlaylistDao.get_playlist(playlist_id)
+        print(query)
+        #return jsonify({'id': query.id, 'name': query.name, 'files': files})
+        return jsonify(success=True)
 
     # EDIT PLAYLIST CONTENT
     @staticmethod

@@ -22,4 +22,3 @@ def logout():
 @login_required
 def profile():
     return AuthAbl.profile()
-

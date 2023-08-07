@@ -14,9 +14,11 @@ class permissions:
         def decorator_require_permissions(func):
             @functools.wraps(func)
             def wrapper_require_permissions(*args, **kwargs):
+                print("wrapper permissions")
                 for perm in permissions:
                     check_perm = CheckPermissionFactory(perm)
-                    if not check_perm.is_valid():
+                    print(args, kwargs)
+                    if not check_perm.is_valid(kwargs):
                         return jsonify( \
                                 message=check_perm.message), \
                                 check_perm.status_code
@@ -33,7 +35,6 @@ def CheckPermissionFactory(perm):
         case Perm.CREATE_ROLE:
             return CheckCreateRole()
         case Perm.CREATE_PLAYLIST:
-            print("creat plays")
             return CheckCreatePlaylist()
         case Perm.VIEW_PLAYLIST:
             return CheckViewPlaylist()
@@ -44,28 +45,49 @@ def CheckPermissionFactory(perm):
         case _:
             return CheckNone()
 
+def get_playlist_id(args):
+    if 'playlist_id' in args:
+        return args['playlist_id'] 
+    return
+    
 
 class CheckNone:
-    def is_valid(self):
+    def is_valid(self, args):
         return True
 
 class CheckOwnPlaylist:
-    def is_valid(self, playlist_id):
-        query = db.session.query(Playlist).filter(Playlist.id == playlist_id).first()
+    def __init__(self):
         self.message = "You don't own this playlist"
         self.status_code = 403
+
+    def is_valid(self, args):
+        playlist_id = get_playlist_id(args)
+        query = db.session.query(Playlist).filter(Playlist.id == playlist_id).first()
+        if query is None:
+            self.message = "This playlist doesn't exist"
+            self.status_code = 404
+            return False
         return query['owner_id'] == current_user.as_dict()['id']
 
 class CheckViewPlaylist:
-    def is_valid(self, playlist_id):
-        if CheckOwnPlaylist().is_valid(playlist_id):
-            return True
+    def __init__(self):
         self.message = "You don't have the permission to view this playlist"
         self.status_code = 403
+
+    def is_valid(self, args):
+        check_own = CheckOwnPlaylist()
+        if check_own.is_valid(args):
+            return True
+        elif check_own.status_code == 404:
+            self.message = "This playlist doesn't exist"
+            self.status_code = 404
+            return False
+
+        # todo check view
         return False
 
 class CheckEditPlaylist:
-    def is_valid(self, playlist_id):
+    def is_valid(self, args):
         if CheckOwnPlaylist().is_valid(playlist_id):
             return True
 

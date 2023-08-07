@@ -43,7 +43,7 @@ class AuthAbl:
             return jsonify(message="Incorrect credentials"), 401
 
         login_user(user)
-        return jsonify(success=True)
+        return jsonify(user.as_dict())
 
     @staticmethod
     def profile():
