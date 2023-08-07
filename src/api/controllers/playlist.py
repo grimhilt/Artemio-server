@@ -12,15 +12,16 @@ from ..permissions import Perm, permissions
 
 playlist = Blueprint('playlist', __name__)
 
-@playlist.route('/', methods=['POST'])
+@playlist.route('', methods=['POST'])
 @login_required
 @permissions.require([Perm.CREATE_PLAYLIST])
 def create():
     return PlaylistAbl.create(request.get_json())
 
-@playlist.route('/', methods=["GET"])
+@playlist.route('/playlists', methods=["GET"])
 @login_required
 def list():
+    print(current_user)
     playlists = db.session.query(Playlist).all()
 
     res = []
@@ -31,7 +32,7 @@ def list():
 
     return jsonify(res)
 
-@playlist.route('/<int:playlist_id>', methods=["GET"])
+@playlist.route('/playlists/<int:playlist_id>', methods=["GET"])
 @login_required
 @permissions.require([Perm.VIEW_PLAYLIST])
 def get_playlist(playlist_id):
@@ -39,44 +40,44 @@ def get_playlist(playlist_id):
 
 # EDIT PLAYLIST
 
-@playlist.route('/<int:playlist_id>', methods=["POST"])
+@playlist.route('/playlists/<int:playlist_id>', methods=["POST"])
 @login_required
 @permissions.require([Perm.EDIT_PLAYLIST])
 def add_file(playlist_id):
     return PlaylistAbl.add_file(request.get_json())
     
-@playlist.route('/<int:playlist_id>/order', methods=["POST"])
+@playlist.route('/playlists/<int:playlist_id>/order', methods=["POST"])
 @login_required
 @permissions.require([Perm.EDIT_PLAYLIST])
 def change_order(playlist_id):
     return PlaylistAbl.change_order(request.get_json())
 
-@playlist.route('/<int:playlist_id>/seconds', methods=["POST"])
+@playlist.route('/playlits/<int:playlist_id>/seconds', methods=["POST"])
 @login_required
 @permissions.require([Perm.EDIT_PLAYLIST])
 def change_seconds(playlist_id):
     return PlaylistAbl.change_seconds(request.get_json())
 
-@playlist.route('/<int:playlist_id>/remove_file', methods=["POST"])
+@playlist.route('/playlists/<int:playlist_id>/remove_file', methods=["POST"])
 @login_required
 @permissions.require([Perm.EDIT_PLAYLIST])
 def remove_file(playlist_id):
     return PlaylistAbl.remove_file(request.get_json())
 
-@playlist.route('/<int:playlist_id>/update', methods=["PUT"])
+@playlist.route('/playlists/<int:playlist_id>/update', methods=["PUT"])
 @login_required
 @permissions.require([Perm.OWN_PLAYLIST])
 def update(playlist_id):
     return PlaylistAbl.update(playlist_id, request.get_json())
 
-@playlist.route('/<int:playlist_id>/activate', methods=["POST"])
+@playlist.route('/playlists/<int:playlist_id>/activate', methods=["POST"])
 @login_required
 def activate(playlist_id):
     screen_manager = ScreenManager.getInstance() 
     screen_manager.activate_playlist(playlist_id)
     return jsonify(success=True)
 
-@playlist.route('/<int:playlist_id>/disactivate', methods=["POST"])
+@playlist.route('/playlists/<int:playlist_id>/disactivate', methods=["POST"])
 @login_required
 def disactivate(playlist_id):
     screen_manager = ScreenManager.getInstance() 

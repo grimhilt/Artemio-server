@@ -18,7 +18,6 @@ def create_api():
     app.secret_key = b'_5#y2L"F4Qfj8zxec]'
 
     login_manager = LoginManager()
-    login_manager.login_view = 'auth.login'
     login_manager.init_app(app)
 
     db.init_app(app)
@@ -30,9 +29,9 @@ def create_api():
     from .controllers.roles import roles
 
     app.register_blueprint(user, url_prefix='/api/user')
-    app.register_blueprint(playlist, url_prefix='/api/playlist')
+    app.register_blueprint(playlist, url_prefix='/api')
     app.register_blueprint(file, url_prefix='/api/file')
-    app.register_blueprint(auth, url_prefix='/auth')
+    app.register_blueprint(auth, url_prefix='/api/auth')
     app.register_blueprint(roles, url_prefix='/api/roles')
 
     from .models import User, Playlist, PlaylistFile, File
