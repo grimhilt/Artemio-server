@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, request
 from ..models import Playlist, PlaylistFile, File
 from .. import db
 from datetime import datetime
@@ -9,7 +9,7 @@ from screen.ScreenManager import ScreenManager
 class PlaylistAbl:
     @staticmethod
     def create(data):
-        new_playlist = Playlist(name=data['name'], owned_id=current_user.as_dict()['id'])
+        new_playlist = Playlist(name=data['name'], owner_id=current_user.as_dict()['id'])
         db.session.add(new_playlist)
         db.session.flush()
         db.session.commit()
@@ -28,15 +28,24 @@ class PlaylistAbl:
 
     @staticmethod
     def get_playlist(playlist_id):
-        print("get")
-        #(query, files) = PlaylistDao.get_playlist(playlist_id)
-        print(query)
-        #return jsonify({'id': query.id, 'name': query.name, 'files': files})
-        return jsonify(success=True)
+        (query, files) = PlaylistDao.get_playlist(playlist_id)
+        return jsonify({'id': query.id, 'name': query.name, 'owner_id': query.owner_id, 'files': files})
+
+    @staticmethod
+    def list():
+        playlists = db.session.query(Playlist).all()
+        res = []
+        for playlist in playlists:
+            p = playlist.as_dict()
+            p['last_modified'] = p['last_modified'].isoformat()
+            res.append(p)
+
+        return jsonify(res)
+
 
     # EDIT PLAYLIST CONTENT
     @staticmethod
-    def add_file(data):
+    def add_file(playlist_id, data):
         data = request.get_json()
         new_playlist_file = PlaylistFile( \
                 playlist_id=playlist_id, \
@@ -50,7 +59,7 @@ class PlaylistAbl:
         return jsonify(success=True)
 
     @staticmethod
-    def change_order(data):
+    def change_order(playlist_id, data):
         db.session.query(PlaylistFile) \
                 .filter(PlaylistFile.file_id == data['file_id']) \
                 .filter(PlaylistFile.playlist_id == playlist_id) \
@@ -59,7 +68,7 @@ class PlaylistAbl:
         return jsonify(success=True)
 
     @staticmethod
-    def change_seconds(data):
+    def change_seconds(playlist_id, data):
         db.session.query(PlaylistFile) \
                 .filter(PlaylistFile.file_id == data['file_id']) \
                 .filter(PlaylistFile.playlist_id == playlist_id) \
@@ -68,7 +77,7 @@ class PlaylistAbl:
         return jsonify(success=True)
 
     @staticmethod
-    def remove_file(data):
+    def remove_file(playlist_id, data):
         data = request.get_json()
         query = db.session.query(PlaylistFile) \
                 .filter(PlaylistFile.file_id == data['file_id']) \
