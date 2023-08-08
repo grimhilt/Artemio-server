@@ -7,6 +7,7 @@ class PlaylistDao:
         files = []
         for playlist_file in query.playlist_files:
             file = playlist_file.file.as_dict()
+            file['pfid'] = playlist_file.id
             file['position'] = playlist_file.position
             file['seconds'] = playlist_file.seconds
             files.append(file)

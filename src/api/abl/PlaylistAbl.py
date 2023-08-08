@@ -1,4 +1,4 @@
-from flask import jsonify, request
+from flask import jsonify
 from ..models import Playlist, PlaylistFile, File
 from .. import db
 from datetime import datetime
@@ -46,7 +46,6 @@ class PlaylistAbl:
     # EDIT PLAYLIST CONTENT
     @staticmethod
     def add_file(playlist_id, data):
-        data = request.get_json()
         new_playlist_file = PlaylistFile( \
                 playlist_id=playlist_id, \
                 file_id=data['file_id'], \
@@ -78,10 +77,8 @@ class PlaylistAbl:
 
     @staticmethod
     def remove_file(playlist_id, data):
-        data = request.get_json()
         query = db.session.query(PlaylistFile) \
-                .filter(PlaylistFile.file_id == data['file_id']) \
-                .filter(PlaylistFile.playlist_id == playlist_id) \
+                .filter(PlaylistFile.id == data['id']) \
                 .first()
         db.session.delete(query)
         db.session.commit()

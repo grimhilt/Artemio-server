@@ -4,8 +4,9 @@ from sqlalchemy.sql import func
 
 class PlaylistFile(db.Model):
     __tablename__ = 'PlaylistFile'
-    playlist_id = db.Column(db.Integer, db.ForeignKey('playlist.id'), primary_key=True)
-    file_id = db.Column(db.Integer, db.ForeignKey('file.id'), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    playlist_id = db.Column(db.Integer, db.ForeignKey('playlist.id'))
+    file_id = db.Column(db.Integer, db.ForeignKey('file.id'))
     position = db.Column(db.Integer)
     seconds = db.Column(db.Integer, default=10)
     playlist = db.relationship('Playlist', back_populates='playlist_files')
