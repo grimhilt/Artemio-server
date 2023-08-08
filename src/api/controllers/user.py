@@ -1,9 +1,5 @@
-from flask import Blueprint, request, jsonify
-from ..models import User
-from werkzeug.security import generate_password_hash, check_password_hash
-from ..models import User
-from .. import db
-from flask_login import login_required, current_user
+from flask import Blueprint, request
+from flask_login import login_required
 from ..abl.UserAbl import UserAbl
 from ..permissions import Perm, permissions
 
@@ -15,11 +11,19 @@ user = Blueprint('user', __name__)
 def create():
     return UserAbl.create(request.get_json())
 
-@user.route('delete', methods=['DELETE'])
-def delete():
-    return "ok"
+@user.route('/users/<int:user_id>', methods=['DELETE'])
+@login_required
+@permissions.require([Perm.CREATE_USER])
+def delete(user_id):
+    return UserAbl.delete(user_id) 
 
 @user.route('/users', methods=['GET'])
 @login_required
 def list():
     return UserAbl.list()
+
+@user.route('/users/<int:user_id>', methods=['PUT'])
+@login_required
+@permissions.require([Perm.CREATE_USER])
+def update(user_id):
+    return UserAbl.update(user_id, request.get_json())
