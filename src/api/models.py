@@ -21,14 +21,21 @@ class File(db.Model):
     def as_dict(self):
        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
+class PlaylistView(db.Model):
+    playlist_id = db.Column(db.Integer, db.ForeignKey('playlist.id'), primary_key=True)
+    role_id = db.Column(db.Integer, db.ForeignKey('role.id'), primary_key=True)
+
+class PlaylistEdit(db.Model):
+    playlist_id = db.Column(db.Integer, db.ForeignKey('playlist.id'), primary_key=True)
+    role_id = db.Column(db.Integer, db.ForeignKey('role.id'), primary_key=True)
+
 class Playlist(db.Model):
     id = db.Column(db.Integer, primary_key = True, autoincrement=True)
     name = db.Column(db.String(150))
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     last_modified = db.Column(db.DateTime(timezone=True), default=func.now())
-    read_permissions = db.Column(db.Integer, default=0)
-    write_permissions = db.Column(db.Integer, default=0)
-    execute_permissions = db.Column(db.Integer, default=0)
+    view = db.relationship('Role', secondary='PlaylistView', back_populates='playlists_view')
+    edit = db.relationship('Role', secondary='PlaylistEdit', back_populates='playlists_edit')
     files = db.relationship('File', secondary='PlaylistFile')
     playlist_files = db.relationship('PlaylistFile', order_by='PlaylistFile.position', back_populates='playlist')
 
@@ -47,6 +54,8 @@ class Role(db.Model):
     permissions= db.Column(db.Integer, default=0)
     parent_id = db.Column(db.Integer, db.ForeignKey('role.id'), default=None)
     users = db.relationship('User', secondary='UserRole', back_populates='roles')
+    playlist_view = db.relationship('Playlist', secondary='PlaylistView', back_populates='view')
+    playlist_edit = db.relationship('Playlist', secondary='PlaylistEdit', back_populates='edit')
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}

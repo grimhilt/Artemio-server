@@ -9,7 +9,9 @@ from screen.ScreenManager import ScreenManager
 class PlaylistAbl:
     @staticmethod
     def create(data):
+        print(data)
         new_playlist = Playlist(name=data['name'], owner_id=current_user.as_dict()['id'])
+        return jsonify()
         db.session.add(new_playlist)
         db.session.flush()
         db.session.commit()

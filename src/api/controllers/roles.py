@@ -4,9 +4,9 @@ from flask_login import login_user, login_required, current_user, logout_user
 from ..models import Role
 from .. import db
 
-roles = Blueprint('roles', __name__)
+roles_bp = Blueprint('roles', __name__)
 
-@roles.route('/roles', methods=['POST'])
+@roles_bp.route('/roles', methods=['POST'])
 @login_required
 def create():
     data = request.get_json()
@@ -25,7 +25,7 @@ def create():
     db.session.commit()
     return jsonify(new_role.as_dict())
 
-@roles.route('/roles/<int:role_id>', methods=["GET"])
+@roles_bp.route('/roles/<int:role_id>', methods=["GET"])
 @login_required
 def get(role_id):
     role = db.session.query(Role).filter_by(id=role_id).first()
@@ -33,13 +33,16 @@ def get(role_id):
         return jsonify(role.as_dict())
     return jsonify(), 404
 
-@roles.route('/roles', methods=["GET"])
+@roles_bp.route('/roles', methods=["GET"])
 @login_required
 def list():
-    res = db.session.query(Role).all()
-    roles = []
-    for role in roles:
-        roles.append(role.as_dict())
-        
-    return jsonify(roles)
+    roles = db.session.query(Role).all()
+    return jsonify([role.as_dict() for role in roles])
+
+@roles_bp.route('/roles/<string:search>', methods=["GET"])
+@login_required
+def search(search):
+    roles = db.session.query(Role).filter(Role.name.like("%"+search+"%")).all()
+    return jsonify([role.as_dict() for role in roles])
+
 

@@ -98,10 +98,11 @@ class CheckViewPlaylist:
         self.status_code = 403
 
     def is_valid(self, args):
-        check_own = CheckOwnPlaylist()
-        if check_own.is_valid(args):
+        # if can edit can view, edit check also for owner
+        check_edit = CheckEditPlaylist()
+        if check_edit.is_valid(args):
             return True
-        elif check_own.status_code == 404:
+        elif check_edit.status_code == 404:
             self.message = "This playlist doesn't exist"
             self.status_code = 404
             return False
