@@ -13,8 +13,8 @@ class AuthAbl:
 
         is_first_user = db.session.query(User).count() == 0
 
-        if not is_first_user and current_user is None:
-            return jsonify(message="You cannot create an account without being authenticated"), 401
+        if not is_first_user:
+            return jsonify(message="You cannot create an account"), 401
 
         user = db.session.query(User).filter_by(login=login).first()
         if user:
@@ -39,8 +39,21 @@ class AuthAbl:
         password = data['password']
 
         user = db.session.query(User).filter_by(login=login).first()
-        if not user or not check_password_hash(user.password, password):
-            return jsonify(message="Incorrect credentials"), 401
+        if not user:
+            nb_users = db.session.query(User).count()
+            if nb_users == 0:
+                user = User(login=login, password=generate_password_hash(password, method='sha256'))
+                db.session.add(user)
+                db.session.flush()
+                new_role = Role(name=login, permissions=0b111, user_id=user.as_dict()['id'])
+                db.session.add(new_role)
+                db.session.flush()
+                user.roles.append(new_role)
+                db.session.commit()
+                login_user(user)
+                return jsonify(user.as_dict())
+            else:
+                return jsonify(message="Incorrect credentials"), 401
 
         login_user(user)
         return jsonify(user.as_dict())

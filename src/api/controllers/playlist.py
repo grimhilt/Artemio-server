@@ -43,7 +43,7 @@ def add_file(playlist_id):
 def change_order(playlist_id):
     return PlaylistAbl.change_order(playlist_id, request.get_json())
 
-@playlist.route('/playlits/<int:playlist_id>/seconds', methods=["POST"])
+@playlist.route('/playlists/<int:playlist_id>/seconds', methods=["POST"])
 @login_required
 @permissions.require([Perm.EDIT_PLAYLIST])
 def change_seconds(playlist_id):
