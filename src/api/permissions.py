@@ -1,11 +1,18 @@
-from enum import Enum
+from enum import IntEnum
 import functools
 from flask import request, jsonify
 from flask_login import current_user
 from . import db
 from .models import Playlist, PlaylistFile, User, Role, UserRole
 
-Perm = Enum('Perm', ['CREATE_ROLE', 'CREATE_PLAYLIST', 'VIEW_PLAYLIST', 'OWN_PLAYLIST', 'EDIT_PLAYLIST', 'ACTIVATE_PLAYLIST'])
+class Perm(IntEnum):
+    CREATE_USER = 0
+    CREATE_ROLE = 1
+    CREATE_PLAYLIST = 2
+    VIEW_PLAYLIST = 3
+    OWN_PLAYLIST = 4
+    EDIT_PLAYLIST = 5
+    ACTIVATE_PLAYLIST = 6
 
 class permissions:
     
@@ -32,6 +39,8 @@ class permissions:
 def CheckPermissionFactory(perm):
     print(perm)
     match perm:
+        case Perm.CREATE_USER:
+            return CheckCreateUser()
         case Perm.CREATE_ROLE:
             return CheckCreateRole()
         case Perm.CREATE_PLAYLIST:
@@ -55,7 +64,14 @@ def get_playlist_id(args):
         print("in")
         return json['playlist_id']
     return
-    
+
+def checkBit(permissions, index):
+    binStr = bin(permissions)
+    lenStr = len(binStr)
+    print(binStr)
+    print(lenStr)
+    print(lenStr - index)
+    return binStr[lenStr - index - 1] == '1'
 
 class CheckNone:
     def is_valid(self, args):
@@ -110,17 +126,21 @@ class CheckEditPlaylist:
         # todo check edit
         return False
 
-class CheckCreatePlaylist:
-    def is_valid(self, _):
-        has_role_to_create = next( \
-                (True \
-                for role in current_user.as_dict()['roles'] \
-                if role['can_create_playlist']), \
-                None)
+class CheckCreateUser:
+    def __init__(self):
+        self.message = "You don't have the permission to create an user"
+        self.status_code = 403
 
+    def is_valid(self, _):
+        return checkBit(current_user.as_dict()['roles'][0]['permissions'], Perm.CREATE_USER)
+
+class CheckCreatePlaylist:
+    def __init__(self):
         self.message = "You don't have the permission to create a playlist"
         self.status_code = 403
-        return has_role_to_create
+
+    def is_valid(self, _):
+        return checkBit(current_user.as_dict()['roles'][0]['permissions'], Perm.CREATE_PLAYLIST)
 
 class CheckActivatePlaylist:
     def __init__(self):

@@ -42,9 +42,9 @@ class UserRole(db.Model):
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String)
-    parent_id = db.Column(db.Integer, db.ForeignKey('role.id'))
-    can_create_role = db.Column(db.Boolean, default=False)
-    can_create_playlist = db.Column(db.Boolean, default=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), default=None)
+    permissions= db.Column(db.Integer, default=0)
+    parent_id = db.Column(db.Integer, db.ForeignKey('role.id'), default=None)
     users = db.relationship('User', secondary='UserRole', back_populates='roles')
 
     def as_dict(self):
