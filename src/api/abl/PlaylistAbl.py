@@ -1,5 +1,5 @@
 from flask import jsonify
-from ..models import Playlist, PlaylistFile, File
+from ..models import Playlist, PlaylistFile, File, Role
 from .. import db
 from datetime import datetime
 from ..dao.Playlist import PlaylistDao
@@ -9,9 +9,16 @@ from screen.ScreenManager import ScreenManager
 class PlaylistAbl:
     @staticmethod
     def create(data):
-        print(data)
+        roles_edit = db.session.query(Role).filter(Role.id.in_(data['edit'])).all()
+        roles_view = db.session.query(Role).filter(Role.id.in_(data['view'])).all()
+
         new_playlist = Playlist(name=data['name'], owner_id=current_user.as_dict()['id'])
-        return jsonify()
+        for role in roles_edit:
+            new_playlist.edit.append(role)
+
+        for role in roles_view:
+            new_playlist.view.append(role)
+        
         db.session.add(new_playlist)
         db.session.flush()
         db.session.commit()
@@ -31,7 +38,14 @@ class PlaylistAbl:
     @staticmethod
     def get_playlist(playlist_id):
         (query, files) = PlaylistDao.get_playlist(playlist_id)
-        return jsonify({'id': query.id, 'name': query.name, 'owner_id': query.owner_id, 'files': files})
+        query = query.as_dict_with_roles()
+        return jsonify({ \
+                'id': query['id'], \
+                'name': query['name'], \
+                'owner_id': query['owner_id'], \
+                'view': query['view'], \
+                'edit': query['edit'], \
+                'files': files})
 
     @staticmethod
     def list():
