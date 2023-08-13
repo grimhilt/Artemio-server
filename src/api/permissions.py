@@ -107,8 +107,18 @@ class CheckViewPlaylist:
             self.status_code = 404
             return False
 
-        # todo check view
-        return False
+        playlist_id = get_playlist_id(args)
+        user_id = current_user.as_dict()['id']
+        has_role_to_view = db.session.query(Playlist) \
+                .filter( \
+                Playlist.view.any( \
+                # check if a role belongs to this user
+                Role.user_id == user_id or \
+                # check if a this user has a role to view
+                Role.users.any(User.id == user_id) \
+                )) \
+                .first()
+        return has_role_to_view is not None
 
 class CheckEditPlaylist:
     def __init__(self):
@@ -124,8 +134,18 @@ class CheckEditPlaylist:
             self.status_code = 404
             return False
 
-        # todo check edit
-        return False
+        playlist_id = get_playlist_id(args)
+        user_id = current_user.as_dict()['id']
+        has_role_to_edit = db.session.query(Playlist) \
+                .filter( \
+                Playlist.edit.any( \
+                # check if a role belongs to this user
+                Role.user_id == user_id or \
+                # check if a this user has a role to edit
+                Role.users.any(User.id == user_id) \
+                )) \
+                .first()
+        return has_role_to_edit is not None
 
 class CheckCreateUser:
     def __init__(self):
