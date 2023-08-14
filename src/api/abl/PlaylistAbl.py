@@ -28,12 +28,23 @@ class PlaylistAbl:
         return jsonify(res)
 
     @staticmethod
-    def update(playlist_id, data):
-        db.session.query(Playlist) \
-                .filter(Playlist.id == playlist_id) \
-                .update({'name': data['name']})
+    def update(playlist_id, data): 
+        playlist = db.session.query(Playlist).get(playlist_id)
+
+        if 'view' in data:
+            roles_view = db.session.query(Role).filter(Role.id.in_(data['view'])).all()
+            playlist.view = roles_view
+
+        if 'edit' in data:
+            roles_edit = db.session.query(Role).filter(Role.id.in_(data['edit'])).all()
+            playlist.edit = roles_edit
+
+        if 'name' in data:
+            playlist.name = data['name']
+
+        db.session.flush()
         db.session.commit()
-        return jsonify(success=True)
+        return jsonify(playlist.as_dict_with_roles())
 
     @staticmethod
     def get_playlist(playlist_id):
