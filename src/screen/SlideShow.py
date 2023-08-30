@@ -4,6 +4,7 @@ from PIL import Image, ImageTk, Image
 from tkvideo import tkvideo
 import time
 import imageio
+import mpv
 
 class SlideShow:
     def __init__(self, root, files):
@@ -83,39 +84,15 @@ class VideoPlayer:
         self.file = file
         self.parent = parent
         self.path = './data/' + self.file['name']
+        self.mpv_instance = mpv.MPV(wid=str(self.parent.canvas.winfo_id()))
         
         self.cap = cv2.VideoCapture(self.path)
         
         self.total_frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
         self.fps = int(self.cap.get(cv2.CAP_PROP_FPS))
-        self.time = int(self.total_frames * ((int(1000/self.fps)+1)))
-        self.delay = int(1000/self.fps)
-        self.i = -1
-        self.frames = []
-        self.preload()
-        self.update()
+        self.time = int(self.total_frames * ((int(1000/self.fps))))
 
-    def preload(self):
-        isPlaying = True
-        while isPlaying:
-            ret, frame = self.cap.read()
-            if ret:
-                image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-                image = self.parent.resize_full_screen(image)
-                photo = ImageTk.PhotoImage(image=image)
-                self.frames.append(photo)
-            else:
-                self.cap.release()
-                isPlaying = False
-
-
-    def update(self):
-        self.i += 1
-        if self.i < len(self.frames):
-            self.parent.show_image(self.frames[self.i])
-            self.parent.root.after(int(self.delay), self.update)
-        else:
-            self.frames = []
+        self.mpv_instance.play(self.path)
 
 class GIFPlayer():
     def __init__(self, parent, file):
