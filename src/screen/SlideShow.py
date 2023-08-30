@@ -51,11 +51,9 @@ class MediaFactory:
         print(self.file)
         self.supported = True
         match file['type']:
-            case "image/gif":
-                self.gif_player()
             case "image/jpeg" | "image/jpg":
                 self.image_player()
-            case "video/mp4":
+            case "video/mp4" | "image/gif":
                 self.video_player()
             case _:
                 print(file['type'], " not supported")
@@ -75,10 +73,6 @@ class MediaFactory:
         video_player = VideoPlayer(self.parent, self.file)
         self.time = video_player.time
 
-    def gif_player(self):
-        gif_player = GIFPlayer(self.parent, self.file)
-        self.time = gif_player.time
-
 class VideoPlayer:
     def __init__(self, parent, file):
         self.file = file
@@ -93,36 +87,3 @@ class VideoPlayer:
         self.time = int(self.total_frames * ((int(1000/self.fps))))
 
         self.mpv_instance.play(self.path)
-
-class GIFPlayer():
-    def __init__(self, parent, file):
-        self.parent = parent
-        self.file = file
-        self.path = './data/' + self.file['name']
-        self.current_frame = 0
-        self.time = 0
-        self.play_gif()
-
-
-    def load_gif_frames(self):
-        gif = Image.open(self.path)
-        frames = []
-        try:
-            while True:
-                frames.append(ImageTk.PhotoImage(gif.copy()))
-                gif.seek(len(frames))  # Move to the next frame
-        except EOFError:
-            pass  # Reached the end of the GIF
-
-        return frames
-
-    def play_gif(self):
-        try:
-            frame = ImageTk.PhotoImage(file=self.path, format="gif -index %i" %(self.current_frame))
-            self.parent.label.config(image=frame)
-            self.parent.label.image = frame
-
-            self.current_frame = self.current_frame + 1
-            self.after((100), self.play_gif)
-        except:
-            pass
