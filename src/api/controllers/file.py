@@ -2,15 +2,14 @@ from flask import Blueprint, request, jsonify, send_file
 from ..models import File
 from .. import db
 
-file = Blueprint('file', __name__)
+files = Blueprint('files', __name__)
 FILE_DIR = './data/'
 
-@file.route('/', methods=['POST'])
+@files.route('/files', methods=['POST'])
 def upload():
-    files = request.files.getlist('file')
-    print(files)
     res = []
-    for file in files:
+    for file_key in request.files:
+        file = request.files[file_key]
         exists = db.session.query(File).filter(File.name == file.filename).first()
         if not exists:
             file.save(FILE_DIR + file.filename)
@@ -19,10 +18,10 @@ def upload():
             db.session.flush()
             res.append(new_file.as_dict().copy())
 
-    db.session.commit()
-    return jsonify(res)
+        db.session.commit()
+        return jsonify(res)
 
-@file.route('/', methods=['GET'])
+@files.route('/files', methods=['GET'])
 def list():
     files = db.session.query(File).all()
     res = []
@@ -30,12 +29,12 @@ def list():
         res.append(file.as_dict())
     return jsonify(res)
 
-@file.route('/<int:file_id>', methods=['GET'])
+@files.route('/files/<int:file_id>', methods=['GET'])
 def load(file_id):
     file = db.session.query(File).filter(File.id == file_id).first()
     return send_file(('../../data/' + file.name), mimetype=file.type)
 
-@file.route('/<int:file_id>', methods=['DELETE'])
+@files.route('/files/<int:file_id>', methods=['DELETE'])
 def delete(file_id):
     rows = db.session.query(File).filter(File.id == file_id).all()
     for row in rows:

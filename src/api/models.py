@@ -59,7 +59,7 @@ class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), default=None)
-    permissions= db.Column(db.Integer, default=0)
+    permissions = db.Column(db.Integer, default=0)
     parent_id = db.Column(db.Integer, db.ForeignKey('role.id'), default=None)
     users = db.relationship('User', secondary='UserRole', back_populates='roles')
     playlists_view = db.relationship('Playlist', secondary='PlaylistView', back_populates='view')

@@ -24,13 +24,13 @@ def create_api():
 
     from .controllers.user import user
     from .controllers.playlist import playlist
-    from .controllers.file import file
+    from .controllers.file import files
     from .controllers.auth import auth
     from .controllers.roles import roles_bp
 
     app.register_blueprint(user, url_prefix='/api')
     app.register_blueprint(playlist, url_prefix='/api')
-    app.register_blueprint(file, url_prefix='/api/file')
+    app.register_blueprint(files, url_prefix='/api')
     app.register_blueprint(auth, url_prefix='/api/auth')
     app.register_blueprint(roles_bp, url_prefix='/api')
 
