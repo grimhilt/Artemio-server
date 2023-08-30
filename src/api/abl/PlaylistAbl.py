@@ -105,7 +105,7 @@ class PlaylistAbl:
     @staticmethod
     def remove_file(playlist_id, data):
         query = db.session.query(PlaylistFile) \
-                .filter(PlaylistFile.file_id == data['file_id']) \
+                .filter(PlaylistFile.id == data['file_id']) \
                 .first()
         db.session.delete(query)
         db.session.commit()
