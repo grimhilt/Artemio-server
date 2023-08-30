@@ -88,28 +88,34 @@ class VideoPlayer:
         
         self.total_frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
         self.fps = int(self.cap.get(cv2.CAP_PROP_FPS))
-        print(self.total_frames, self.fps)
         self.time = int(self.total_frames * ((int(1000/self.fps)+1)))
-        self.time = 30 * 1000
-        print(int(1000/self.fps))
-        self.is_playing = True
-        self.i = 0
+        self.delay = int(1000/self.fps)
+        self.i = -1
+        self.frames = []
+        self.preload()
         self.update()
 
-    def update(self):
-        if self.is_playing:
-            self.i = self.i + 1
-            #print(self.i)
+    def preload(self):
+        isPlaying = True
+        while isPlaying:
             ret, frame = self.cap.read()
             if ret:
                 image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
                 image = self.parent.resize_full_screen(image)
                 photo = ImageTk.PhotoImage(image=image)
-                self.parent.show_image(photo)
+                self.frames.append(photo)
             else:
-                self.is_playing = False
                 self.cap.release()
-            self.parent.root.after(int(1000/self.fps), self.update)
+                isPlaying = False
+
+
+    def update(self):
+        self.i += 1
+        if self.i < len(self.frames):
+            self.parent.show_image(self.frames[self.i])
+            self.parent.root.after(int(self.delay), self.update)
+        else:
+            self.frames = []
 
 class GIFPlayer():
     def __init__(self, parent, file):
