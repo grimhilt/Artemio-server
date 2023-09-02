@@ -1,5 +1,5 @@
 import tkinter as tk
-import cv2
+#import cv2
 from PIL import Image, ImageTk, Image
 from tkvideo import tkvideo
 import time
@@ -85,10 +85,10 @@ class VideoPlayer:
         player.wait_for_playback()
         player.metadata
         
-        self.cap = cv2.VideoCapture(self.path)
+        #self.cap = cv2.VideoCapture(self.path)
         
-        self.total_frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        self.fps = int(self.cap.get(cv2.CAP_PROP_FPS))
-        self.time = int(self.total_frames * ((int(1000/self.fps))))
+        #self.total_frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        #self.fps = int(self.cap.get(cv2.CAP_PROP_FPS))
+        #self.time = int(self.total_frames * ((int(1000/self.fps))))
 
         self.mpv_instance.play(self.path)
