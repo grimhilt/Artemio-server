@@ -79,6 +79,11 @@ class VideoPlayer:
         self.parent = parent
         self.path = './data/' + self.file['name']
         self.mpv_instance = mpv.MPV(wid=str(self.parent.canvas.winfo_id()))
+        print(self.mpv_instance)
+        player = mpv.MPV(ytdl=True)
+        player.play('https://youtu.be/DOmdB7D-pUU')
+        player.wait_for_playback()
+        player.metadata
         
         self.cap = cv2.VideoCapture(self.path)
         
