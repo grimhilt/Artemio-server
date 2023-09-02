@@ -13,23 +13,23 @@ if __name__ == '__main__':
     import imageio
     #player = mpv.MPV(ytdl=True)
     #player.play("./data/VID_20230403_143809.mp4")
-    video_file_path = "./data/VID_20230403_143809.mp4"
-    video = imageio.get_reader(video_file_path, "ffmpeg")
+    #video_file_path = "./data/VID_20230403_143809.mp4"
+    #video = imageio.get_reader(video_file_path, "ffmpeg")
 
 # Get the number of frames and the frame rate
-    num_frames = len(video)
-    frame_rate = video.get_meta_data()['fps']
+    #num_frames = len(video)
+    #frame_rate = video.get_meta_data()['fps']
 
 # Calculate the duration in seconds
-    duration = num_frames / frame_ratek
-    print(duration)
+    #duration = num_frames / frame_rate
+    #print(duration)
     root = tk.Tk()
     root.title("Slideshow")
     files = [
             {"name": "VID_20230403_143809.mp4", "type":"video/mp4", "seconds":0},
-            {"name": "egg.jpg", "type":"image/jpg", "seconds":3},
+            {"name": "egg.jpg", "type":"image/jpg", "seconds":7},
             ]
-    #SlideShow(root, files)
+    SlideShow(root, files)
     root.mainloop()
 
 

@@ -4,6 +4,7 @@ from PIL import Image, ImageTk, Image
 from tkvideo import tkvideo
 import time
 import imageio
+import vlc
 import mpv
 
 class SlideShow:
@@ -78,12 +79,19 @@ class VideoPlayer:
         self.file = file
         self.parent = parent
         self.path = './data/' + self.file['name']
-        self.mpv_instance = mpv.MPV(wid=str(self.parent.canvas.winfo_id()))
-        print(self.mpv_instance)
-        player = mpv.MPV(ytdl=True)
-        player.play('https://youtu.be/DOmdB7D-pUU')
-        player.wait_for_playback()
-        player.metadata
+        #self.mpv_instance = mpv.MPV(wid=str(self.parent.canvas.winfo_id()))
+        instance = vlc.Instance()
+        player = instance.media_player_new()
+        media = instance.media_new(self.path)
+        media.parse()
+        self.time = media.get_duration()
+        print(self.time)
+        # Get the X11 window ID of the Tkinter canvas
+        #hwnd = str(self.parent.canvas.winfo_id())
+        #print(hwnd)
+        player.set_media(media)
+        player.set_xwindow(self.parent.canvas.winfo_id())
+        player.play()
         
         #self.cap = cv2.VideoCapture(self.path)
         
@@ -91,4 +99,4 @@ class VideoPlayer:
         #self.fps = int(self.cap.get(cv2.CAP_PROP_FPS))
         #self.time = int(self.total_frames * ((int(1000/self.fps))))
 
-        self.mpv_instance.play(self.path)
+        #self.mpv_instance.play(self.path)
