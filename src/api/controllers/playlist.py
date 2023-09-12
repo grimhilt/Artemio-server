@@ -20,6 +20,7 @@ def create():
 
 @playlist.route('/playlists', methods=["GET"])
 @login_required
+@permissions.require([Perm.VIEW_PLAYLIST])
 def list():
     return PlaylistAbl.list()
 

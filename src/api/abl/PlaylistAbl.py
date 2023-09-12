@@ -3,6 +3,7 @@ from ..models import Playlist, PlaylistFile, File, Role
 from .. import db
 from datetime import datetime
 from ..dao.Playlist import PlaylistDao
+from ..dao.UsersDao import UsersDao
 from flask_login import current_user
 from screen.ScreenManager import ScreenManager
 
@@ -50,17 +51,18 @@ class PlaylistAbl:
     def get_playlist(playlist_id):
         (query, files) = PlaylistDao.get_playlist(playlist_id)
         query = query.as_dict_with_roles()
-        return jsonify({ \
-                'id': query['id'], \
-                'name': query['name'], \
-                'owner_id': query['owner_id'], \
-                'view': query['view'], \
-                'edit': query['edit'], \
+        return jsonify({
+                'id': query['id'],
+                'name': query['name'],
+                'owner_id': query['owner_id'],
+                'view': query['view'],
+                'edit': query['edit'],
                 'files': files})
 
     @staticmethod
     def list():
-        playlists = db.session.query(Playlist).all()
+        user_id = current_user.as_dict()['id']
+        playlists = UsersDao.playlists(user_id)
         res = []
         for playlist in playlists:
             p = playlist.as_dict()
@@ -73,11 +75,11 @@ class PlaylistAbl:
     # EDIT PLAYLIST CONTENT
     @staticmethod
     def add_file(playlist_id, data):
-        new_playlist_file = PlaylistFile( \
-                playlist_id=playlist_id, \
-                file_id=data['file_id'], \
-                position=data['position'], \
-                seconds=data['seconds'] \
+        new_playlist_file = PlaylistFile(
+                playlist_id=playlist_id,
+                file_id=data['file_id'],
+                position=data['position'],
+                seconds=data['seconds']
                 )
 
         db.session.add(new_playlist_file)
