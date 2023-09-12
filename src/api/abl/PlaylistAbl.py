@@ -87,7 +87,7 @@ class PlaylistAbl:
     @staticmethod
     def change_order(playlist_id, data):
         db.session.query(PlaylistFile) \
-                .filter(PlaylistFile.file_id == data['file_id']) \
+                .filter(PlaylistFile.id == data['pfid']) \
                 .filter(PlaylistFile.playlist_id == playlist_id) \
                 .update({'position': data['position']})
         db.session.commit()
@@ -96,7 +96,7 @@ class PlaylistAbl:
     @staticmethod
     def change_seconds(playlist_id, data):
         db.session.query(PlaylistFile) \
-                .filter(PlaylistFile.file_id == data['file_id']) \
+                .filter(PlaylistFile.id == data['pfid']) \
                 .filter(PlaylistFile.playlist_id == playlist_id) \
                 .update({'seconds': data['seconds']})
         db.session.commit()
@@ -105,7 +105,7 @@ class PlaylistAbl:
     @staticmethod
     def remove_file(playlist_id, data):
         query = db.session.query(PlaylistFile) \
-                .filter(PlaylistFile.id == data['file_id']) \
+                .filter(PlaylistFile.id == data['pfid']) \
                 .first()
         db.session.delete(query)
         db.session.commit()
