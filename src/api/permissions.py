@@ -4,6 +4,9 @@ from flask import request, jsonify
 from flask_login import current_user
 from . import db
 from .models import Playlist, PlaylistFile, User, Role, UserRole
+from .dao.Playlist import PlaylistDao
+from .dao.UsersDao import UsersDao
+
 
 class Perm(IntEnum):
     CREATE_USER = 0
@@ -59,11 +62,10 @@ def CheckPermissionFactory(perm):
 def get_playlist_id(args):
     if 'playlist_id' in args:
         return args['playlist_id'] 
-    json = request.get_json()
-    if 'playlist_id' in json:
-        print("in")
+    json = request.get_json(silent=True)
+    if json is not None and 'playlist_id' in json:
         return json['playlist_id']
-    return
+    return None
 
 def checkBit(permissions, index):
     binStr = bin(permissions)
@@ -84,12 +86,14 @@ class CheckOwnPlaylist:
 
     def is_valid(self, args):
         playlist_id = get_playlist_id(args)
-        query = db.session.query(Playlist).filter(Playlist.id == playlist_id).first()
+        if playlist_id is None:
+            return False
+
+        query = PlaylistDao.get_playlist_q(playlist_id)
         if query is None:
             self.message = "This playlist doesn't exist"
             self.status_code = 404
             return False
-        print(query.as_dict())
         return query.as_dict()['owner_id'] == current_user.as_dict()['id']
 
 class CheckViewPlaylist:
@@ -109,15 +113,18 @@ class CheckViewPlaylist:
 
         playlist_id = get_playlist_id(args)
         user_id = current_user.as_dict()['id']
-        has_role_to_view = db.session.query(Playlist) \
-                .filter( \
-                Playlist.view.any( \
-                # check if a role belongs to this user
-                Role.user_id == user_id or \
-                # check if a this user has a role to view
-                Role.users.any(User.id == user_id) \
-                )) \
-                .first()
+
+        # if playlist_id is none then there is not precise playlist 
+        # to compare the permissions, so we check if the user has 
+        # a permission on any playlist
+        has_role_to_view = None
+        if playlist_id is not None:
+            # check if has role on one precise playlist
+            has_role_to_view = PlaylistDao.has_role_to_view(playlist_id, user_id)
+        else:
+            # check if has role to view any playlist
+            has_role_to_view = UsersDao.has_role_view_q(user_id)
+
         return has_role_to_view is not None
 
 class CheckEditPlaylist:
@@ -133,18 +140,21 @@ class CheckEditPlaylist:
             self.message = "This playlist doesn't exist"
             self.status_code = 404
             return False
-
+        
         playlist_id = get_playlist_id(args)
         user_id = current_user.as_dict()['id']
-        has_role_to_edit = db.session.query(Playlist) \
-                .filter( \
-                Playlist.edit.any( \
-                # check if a role belongs to this user
-                Role.user_id == user_id or \
-                # check if a this user has a role to edit
-                Role.users.any(User.id == user_id) \
-                )) \
-                .first()
+
+        # if playlist_id is none then there is not precise playlist 
+        # to compare the permissions, so we check if the user has 
+        # a permission on any playlist
+        has_role_to_edit = None
+        if playlist_id is not None:
+            # check if has role on one precise playlist
+            has_role_to_edit = PlaylistDao.has_role_to_edit(playlist_id, user_id)
+        else:
+            # check if has role to view any playlist
+            has_role_to_edit = UsersDao.has_role_edit_q(user_id)
+
         return has_role_to_edit is not None
 
 class CheckCreateUser:

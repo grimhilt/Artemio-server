@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_login import LoginManager
 from os import path
+from config.config import get_secret_key
 import logging
 
 
@@ -15,7 +16,7 @@ def create_api():
     CORS(app)
     logging.getLogger('flask_cors').level = logging.DEBUG
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
-    app.secret_key = b'_5#y2L"F4Qfj8zxec]'
+    app.secret_key = get_secret_key() 
 
     login_manager = LoginManager()
     login_manager.init_app(app)

@@ -2,7 +2,7 @@ import os
 import random
 import string
 
-SECRET_KEY_FILE = './src/config/SECRET_KEY'
+SECRET_KEY_FILE = './config/SECRET_KEY'
 
 def get_secret_key():
     if os.path.isfile(SECRET_KEY_FILE):
