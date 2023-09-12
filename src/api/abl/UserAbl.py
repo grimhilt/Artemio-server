@@ -28,19 +28,19 @@ class UserAbl:
                 return jsonify(message="You don't have the permission to give permission(s) you don't have"), 403
 
         # create the user
-        new_user = User( \
-                login=login, \
-                password=generate_password_hash(password, method='sha256') \
+        new_user = User(
+                login=login,
+                password=generate_password_hash(password, method='sha256')
                 )
 
         db.session.add(new_user)
         db.session.flush()
 
         # create the permissions for the user
-        new_role = Role( \
-                name=login, \
-                user_id=new_user.as_dict()['id'], \
-                parent_id=current_user.as_dict()['roles'][0]['id'], \
+        new_role = Role(
+                name=login,
+                user_id=new_user.as_dict()['id'],
+                parent_id=current_user.as_dict()['roles'][0]['id'],
                 permissions=permissions)
         db.session.add(new_role)
         new_user.roles.append(new_role)

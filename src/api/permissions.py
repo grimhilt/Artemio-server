@@ -29,7 +29,7 @@ class permissions:
                     check_perm = CheckPermissionFactory(perm)
                     print(args, kwargs)
                     if not check_perm.is_valid(kwargs):
-                        return jsonify( \
+                        return jsonify(
                                 message=check_perm.message), \
                                 check_perm.status_code
                 return func(*args, **kwargs)

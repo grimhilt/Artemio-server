@@ -21,24 +21,24 @@ class PlaylistDao:
     def has_role_view_d(playlist_id, user_id):
         has_role_to_view = db.session.query(Playlist) \
                 .filter(Playlist.id == playlist_id) \
-                .filter( \
-                Playlist.view.any( \
+                .filter(
+                Playlist.view.any(
                 # check if a role belongs to this user
-                Role.user_id == user_id or \
+                Role.user_id == user_id or
                 # check if a this user has a role to view
-                Role.users.any(User.id == user_id) \
+                Role.users.any(User.id == user_id)
                 )) \
                 .first()
         return has_role_to_view
 
     def has_role_view_d(playlist_id, user_id):
         has_role_to_edit = db.session.query(Playlist) \
-                .filter( \
-                Playlist.edit.any( \
+                .filter(
+                Playlist.edit.any(
                 # check if a role belongs to this user
-                Role.user_id == user_id or \
+                Role.user_id == user_id or
                 # check if a this user has a role to edit
-                Role.users.any(User.id == user_id) \
+                Role.users.any(User.id == user_id)
                 )) \
                 .first()
         return has_role_to_edit
