@@ -31,7 +31,7 @@ class PlaylistDao:
                 .first()
         return has_role_to_view
 
-    def has_role_view_d(playlist_id, user_id):
+    def has_role_edit_d(playlist_id, user_id):
         has_role_to_edit = db.session.query(Playlist) \
                 .filter(
                 Playlist.edit.any(

@@ -7,6 +7,8 @@ import imageio
 import vlc
 import mpv
 
+DATA_DIR = "../data/"
+
 class SlideShow:
     def __init__(self, root, files):
         print(files)
@@ -62,7 +64,7 @@ class MediaFactory:
 
     def image_player(self):
         print("image player")
-        path = './data/' + self.file['name']
+        path = DATA_DIR + self.file['name']
         image = Image.open(path)
 
         image = self.parent.resize_full_screen(image)
@@ -78,7 +80,7 @@ class VideoPlayer:
     def __init__(self, parent, file):
         self.file = file
         self.parent = parent
-        self.path = './data/' + self.file['name']
+        self.path = DATA_DIR + self.file['name']
         #self.mpv_instance = mpv.MPV(wid=str(self.parent.canvas.winfo_id()))
         instance = vlc.Instance()
         player = instance.media_player_new()

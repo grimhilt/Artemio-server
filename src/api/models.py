@@ -55,15 +55,35 @@ class UserRole(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'), primary_key=True)
 
+class ParentRole(db.Model):
+    __tablename__ = 'ParentRole'
+    parent_id = db.Column(db.Integer, db.ForeignKey('role.id'), primary_key=True)
+    child_id = db.Column(db.Integer, db.ForeignKey('role.id'), primary_key=True)
+
+    def as_dict(self):
+       return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), default=None)
     permissions = db.Column(db.Integer, default=0)
     parent_id = db.Column(db.Integer, db.ForeignKey('role.id'), default=None)
+    children = db.relationship('Role', secondary="ParentRole",
+                            primaryjoin=id == ParentRole.parent_id,
+                            secondaryjoin=id == ParentRole.child_id,
+                            backref='parents')
+    
     users = db.relationship('User', secondary='UserRole', back_populates='roles')
     playlists_view = db.relationship('Playlist', secondary='PlaylistView', back_populates='view')
     playlists_edit = db.relationship('Playlist', secondary='PlaylistEdit', back_populates='edit')
+
+    def as_full_dict(self):
+        res = self.as_dict()
+        res['parents'] = [parent.as_dict() for parent in self.parents]
+        res['children'] = [child.as_dict() for child in self.children]
+        return res
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
@@ -76,7 +96,7 @@ class User(db.Model, UserMixin):
 
     def as_dict(self):
         res = self.as_dict_unsafe()
-        res['roles'] = [role.as_dict() for role in self.roles]
+        res['roles'] = [role.as_full_dict() for role in self.roles]
         del res['password']
         return res
 
