@@ -12,6 +12,9 @@ class PlaylistFile(db.Model):
     playlist = db.relationship('Playlist', back_populates='playlist_files')
     file = db.relationship('File', back_populates='playlist_files')
 
+    def as_dict(self):
+       return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 class File(db.Model):
     id = db.Column(db.Integer, primary_key = True, autoincrement=True)
     name = db.Column(db.String(150))

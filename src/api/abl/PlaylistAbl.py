@@ -84,7 +84,10 @@ class PlaylistAbl:
 
         db.session.add(new_playlist_file)
         db.session.commit()
-        return jsonify(success=True)
+        res = new_playlist_file.as_dict()
+        res['pfid'] = res['id']
+        del res['id']
+        return jsonify(res)
 
     @staticmethod
     def change_order(playlist_id, data):

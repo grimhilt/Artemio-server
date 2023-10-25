@@ -5,7 +5,7 @@ from ..models import File
 from .. import db
 
 files = Blueprint('files', __name__)
-FILE_DIR = './data/'
+FILE_DIR = '../data/'
 
 @files.route('/files', methods=['POST'])
 @login_required
@@ -14,6 +14,7 @@ def upload():
     res = []
     for file_key in request.files:
         file = request.files[file_key]
+        print(file.filename)
         exists = db.session.query(File).filter(File.name == file.filename).first()
         if not exists:
             file.save(FILE_DIR + file.filename)
@@ -23,7 +24,7 @@ def upload():
             res.append(new_file.as_dict().copy())
 
         db.session.commit()
-        return jsonify(res)
+    return jsonify(res)
 
 @files.route('/files', methods=['GET'])
 @login_required
